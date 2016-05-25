@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace TorTray
@@ -8,6 +9,13 @@ namespace TorTray
     {
         static void Main()
         {
+            bool createdNew;
+            var mutex = new Mutex(true, "TorTray", out createdNew);
+            if (!createdNew)
+            {
+                MessageBox.Show("TorTray app already running");
+                Environment.Exit(0);
+            }
             Application.Run(new TrayApp());
         }
     }
@@ -19,6 +27,11 @@ namespace TorTray
         {
             try
             {
+                if (Process.GetProcessesByName("tor").Length > 0)
+                {
+                    MessageBox.Show("Tor.exe process already running");
+                    Environment.Exit(0);
+                }
                 torProcess = new Process()
                 {
                     StartInfo = new ProcessStartInfo()
