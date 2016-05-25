@@ -19,10 +19,15 @@ namespace TorTray
         {
             try
             {
-                torProcess = new Process();
-                torProcess.StartInfo.FileName = @"tor.exe";
-                torProcess.StartInfo.UseShellExecute = false;
-                torProcess.StartInfo.CreateNoWindow = true;
+                torProcess = new Process()
+                {
+                    StartInfo = new ProcessStartInfo()
+                    {
+                        FileName = "tor.exe",
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    }
+                };
                 torProcess.Start();
                 notifyIcon = new NotifyIcon()
                 {
