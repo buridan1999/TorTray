@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace TorTray
@@ -17,20 +14,21 @@ namespace TorTray
     public class TrayApp : ApplicationContext
     {
         private NotifyIcon notifyIcon;
-        private Process torProcess = new Process();
+        private Process torProcess;
         public TrayApp()
         {
             try
             {
+                torProcess = new Process();
                 torProcess.StartInfo.FileName = @"tor.exe";
                 torProcess.StartInfo.UseShellExecute = false;
                 torProcess.StartInfo.CreateNoWindow = true;
                 torProcess.Start();
-
                 notifyIcon = new NotifyIcon()
                 {
                     Icon = Properties.Resources.toricon,
-                    ContextMenu = new ContextMenu(new MenuItem[] {
+                    ContextMenu = new ContextMenu(new MenuItem[]
+                    {
                         new MenuItem("Restart", Restart),
                         new MenuItem("Shutdown", Shutdown)
                     }),
