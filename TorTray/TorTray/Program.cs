@@ -29,7 +29,7 @@ namespace TorTray
             {
                 if (Process.GetProcessesByName("tor").Length > 0)
                 {
-                    MessageBox.Show("Tor.exe process already running");
+                    MessageBox.Show("tor process already running");
                     Environment.Exit(0);
                 }
                 torProcess = new Process()
