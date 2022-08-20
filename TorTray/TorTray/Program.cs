@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
+using System.Configuration;
 
 namespace TorTray
 {
@@ -17,26 +18,27 @@ namespace TorTray
                 MessageBox.Show("TorTray app already running");
                 Environment.Exit(0);
             }
-            Application.Run(new TrayApp());
+            Application.Run(new TrayApp(Properties.Settings.Default));
         }
     }
     public class TrayApp : ApplicationContext
     {
-        //const string TorPath = "\"C:\\Program Files (x86)\\Tor\\Tor Browser\\Browser\\TorBrowser\\Tor\\tor.exe\" - f C:\\tor\\Data\\Tor\\torrc";
-        const string TorPath = "\"C:\\Program Files (x86)\\Tor\\Tor Browser\\Browser\\TorBrowser\\Tor\\tor.exe\"";
-        const string TorArgs = "-f C:\\tor\\Data\\Tor\\torrc";
+        private string TorPath;
+        private string TorArgs;
+
         private NotifyIcon notifyIcon;
-        //private Process torProcess;
-        //private Process[] torProcesses;
         private List<Process> torProcesses;
         private bool torEnabled = false;
 
         private ContextMenu Restart_;
         private ContextMenu Start_;
-        public TrayApp()
+        public TrayApp(Properties.Settings settings)
         {
             try
             {
+                TorPath = settings.torPath;
+                TorArgs = settings.torArgs;
+
                 torProcesses = new List<Process>(Process.GetProcessesByName("tor"));
                 if (torProcesses.Count > 0)
                 {
@@ -47,16 +49,18 @@ namespace TorTray
                     ProcessStartInfo StartInfo = new ProcessStartInfo(TorPath);
                     StartInfo.Arguments = TorArgs;
 
-                    //new List<Process>(new int[] { 10, 20, 10, 34, 113 });
                     torProcesses.Add(Process.Start(StartInfo));
                     torEnabled = true;
                 }
 
+                // menu when tor doesn't started
                 Start_ = new ContextMenu(new MenuItem[]
                     {
                         new MenuItem("Start", Restart),
                         new MenuItem("ExitTray", ExitTray)
                     });
+
+                // menu when tor already started
                 Restart_ = new ContextMenu(new MenuItem[]
                     {
                         new MenuItem("Restart", Restart),
