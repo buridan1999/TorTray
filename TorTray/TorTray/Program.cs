@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
+using System.Configuration;
 
 namespace TorTray
 {
@@ -16,40 +18,61 @@ namespace TorTray
                 MessageBox.Show("TorTray app already running");
                 Environment.Exit(0);
             }
-            Application.Run(new TrayApp());
+            Application.Run(new TrayApp(Properties.Settings.Default));
         }
     }
     public class TrayApp : ApplicationContext
     {
+        private string TorPath;
+        private string TorArgs;
+
         private NotifyIcon notifyIcon;
-        private Process torProcess;
-        public TrayApp()
+        private List<Process> torProcesses;
+        private bool torEnabled = false;
+
+        private ContextMenu Restart_;
+        private ContextMenu Start_;
+        public TrayApp(Properties.Settings settings)
         {
             try
             {
-                if (Process.GetProcessesByName("tor").Length > 0)
+                TorPath = settings.torPath;
+                TorArgs = settings.torArgs;
+
+                torProcesses = new List<Process>(Process.GetProcessesByName("tor"));
+                if (torProcesses.Count > 0)
                 {
-                    MessageBox.Show("tor process already running");
-                    Environment.Exit(0);
+                    torEnabled = true;
                 }
-                torProcess = new Process()
+                else
                 {
-                    StartInfo = new ProcessStartInfo()
+                    ProcessStartInfo StartInfo = new ProcessStartInfo(TorPath);
+                    StartInfo.Arguments = TorArgs;
+
+                    torProcesses.Add(Process.Start(StartInfo));
+                    torEnabled = true;
+                }
+
+                // menu when tor doesn't started
+                Start_ = new ContextMenu(new MenuItem[]
                     {
-                        FileName = "tor.exe",
-                        UseShellExecute = false,
-                        CreateNoWindow = true
-                    }
-                };
-                torProcess.Start();
+                        new MenuItem("Start", Restart),
+                        new MenuItem("ExitTray", ExitTray)
+                    });
+
+                // menu when tor already started
+                Restart_ = new ContextMenu(new MenuItem[]
+                    {
+                        new MenuItem("Restart", Restart),
+                        new MenuItem("Shutdown", Shutdown),
+                        new MenuItem("ExitTray", ExitTray)
+                    });
+
+                notifyIcon = null;
                 notifyIcon = new NotifyIcon()
                 {
                     Icon = Properties.Resources.toricon,
-                    ContextMenu = new ContextMenu(new MenuItem[]
-                    {
-                        new MenuItem("Restart", Restart),
-                        new MenuItem("Shutdown", Shutdown)
-                    }),
+                    ContextMenu = Restart_,
                     Visible = true
                 };
             }
@@ -61,13 +84,35 @@ namespace TorTray
         }
         private void Restart(object sender, EventArgs e)
         {
-            torProcess.Kill();
-            torProcess.Start();
+            foreach (Process proc in torProcesses)
+            {
+                if (torEnabled)
+                    proc.Kill();
+
+                proc.Start();
+            }
+
+            torEnabled = true;
+            notifyIcon.ContextMenu = Restart_;
         }
         private void Shutdown(object sender, EventArgs e)
         {
+            if (torEnabled)
+            {
+                foreach (Process proc in torProcesses)
+                {
+                    proc.Kill();
+                }
+            }
+
+            torEnabled = false;
+
+            notifyIcon.ContextMenu = Start_;
+        }
+
+        private void ExitTray(object sender, EventArgs e)
+        {
             notifyIcon.Visible = false;
-            torProcess.Kill();
             Environment.Exit(0);
         }
     }

@@ -1,7 +1,12 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)">
-  <Profiles>
-    <Profile Name="(Default)" />
-  </Profiles>
-  <Settings />
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="TorTray.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="torPath" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">"C:\Program Files (x86)\Tor\Tor Browser\Browser\TorBrowser\Tor\tor.exe"</Value>
+    </Setting>
+    <Setting Name="torArgs" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">-f C:\tor\Data\Tor\torrc</Value>
+    </Setting>
+  </Settings>
 </SettingsFile>
